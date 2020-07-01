@@ -48,10 +48,10 @@ func delete(key string) {
 	}
 }
 
-func deleteTestEntries() {
+func deleteTestEntries(startsWith string) {
 	kvs := getKVs()
 	for _, res := range kvs.Result {
-		if key := res.Name; strings.HasPrefix(key, "test_") {
+		if key := res.Name; strings.HasPrefix(key, startsWith) {
 			delete(key)
 		}
 	}
@@ -64,6 +64,10 @@ func worker(basePath string, paths <-chan string, kvPairs chan<- *cloudflare.Wor
 		if err != nil {
 			panic(err)
 		}
+		// resp, err := api.WriteWorkersKV(context.Background(), namespaceID, p, bytes)
+		// util.Check(err)
+		// fmt.Println(resp.Success, p)
+		// kvPairs <- nil
 		kvPairs <- &cloudflare.WorkersKVPair{
 			Key:   p,
 			Value: string(bytes),
@@ -72,6 +76,9 @@ func worker(basePath string, paths <-chan string, kvPairs chan<- *cloudflare.Wor
 }
 
 func main() {
+	// deleteTestEntries("3D")
+	// os.Exit(1)
+
 	basePath := util.GetCDNJSPackages()
 	files, err := filepath.Glob(path.Join(basePath, "*", "package.json"))
 	util.Check(err)
@@ -99,79 +106,18 @@ func main() {
 			paths <- path.Join(versionPath, s)
 		}
 		for i := 0; i < len(strs); i++ {
+			// <-kvPairs
 			k := <-kvPairs
 			fmt.Println("received! ", k.Key, len(k.Value))
 			kvs = append(kvs, k)
-			// os.Exit(1)
 		}
-		break
+		// break
 	}
-
+	fmt.Println("waiting ...")
 	resp, err := api.WriteWorkersKVBulk(context.Background(), namespaceID, kvs)
 	util.Check(err)
 	fmt.Println(resp)
 
-	//	fmt.Println(strings.Replace(files[2], libsPath, "", 1))
 	os.Exit(1)
 
-	// best way to get a file to a string ?
-
-	// deleteTestEntries()
-	// os.Exit(1)
-
-	//
-
-	// api, err := cloudflare.New(apiKey, user, cloudflare.UsingAccount(accountID))
-	// if err != nil {
-	// 	log.Fatal("fail1", err)
-	// }
-
-	// //rand.Read(payload)
-
-	// for i := 0; i < 100; i++ {
-	// 	//payload := make([]byte, 10485761)
-	// 	//key := "small_file"
-	// 	resp, err := api.WriteWorkersKV(context.Background(), namespace, fmt.Sprintf("test_%d", i), []byte(fmt.Sprintf("value_%d", i)))
-	// 	if err != nil {
-	// 		log.Fatal("fail2", err)
-	// 	}
-	// 	fmt.Println(resp.Success)
-	// }
-
-	// bulk request fast
-	// use worker pool to generate bulk request
-	// push bulk request
-	//ioutil.Read
-
-	// list files glob
-	// get list of files -- push that number of jobs
-	// receive path, return cloudflare.WorkersKVPair, or error ??? or nil ???
-
-	// try normally then with bulk and compare time
-
-	// var kvs []*cloudflare.WorkersKVPair
-	// for i := 0; i < 100; i++ {
-	// 	//payload := make([]byte, 10485761)
-	// 	//key := "small_file"
-	// 	kvs = append(kvs, &cloudflare.WorkersKVPair{
-	// 		Key:   fmt.Sprintf("test_%d", i),
-	// 		Value: fmt.Sprintf("value_%d", i),
-	// 	})
-	// 	// resp, err := api.WriteWorkersKV(context.Background(), namespace, fmt.Sprintf("test_%d", i), []byte(fmt.Sprintf("value_%d", i)))
-	// 	// if err != nil {
-	// 	// 	log.Fatal("fail2", err)
-	// 	// }
-	// 	// fmt.Println(resp.Success)
-	// }
-
-	// resp, err := api.WriteWorkersKVBulk(context.Background(), namespaceID, kvs)
-	// util.Check(err)
-	// fmt.Println(resp)
-
-	// 	fmt.Println(resp)
-	// }
-
-	// fmt.Printf("`%s`\n", resp)
-
-	// fmt.Println(resp)
 }
