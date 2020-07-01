@@ -76,8 +76,29 @@ func worker(basePath string, paths <-chan string, kvPairs chan<- *cloudflare.Wor
 }
 
 func main() {
+	// api.WriteWorkersKVBulk()
+	// cloudflare.WorkersKVBulkWriteRequest{}
+	//api.ListWorkersKVs()
+	//api.UpdateWorkersKVNamespace()
+	// cloudflare.WorkersKVNamespaceRequest{
+
+	// }
+
+	// update matadata
+	// add function to api?
+
+	// api.WriteWorkersKV()
+
+	//api.UpdateWorkersKVNamespace
+	// for i := 0; i < 100; i++ {
+	// 	resp, err := api.WriteWorkersKV(context.Background(), namespaceID, "hello-world", []byte(fmt.Sprintf("hello world %d", i)))
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	fmt.Println(resp)
+	// }
 	// deleteTestEntries("3D")
-	// os.Exit(1)
+	os.Exit(1)
 
 	basePath := util.GetCDNJSPackages()
 	files, err := filepath.Glob(path.Join(basePath, "*", "package.json"))
@@ -97,6 +118,8 @@ func main() {
 	util.Check(err)
 
 	var kvs []*cloudflare.WorkersKVPair
+
+	// make api call to get kv entry for this particular package
 
 	for _, v := range p.Versions() {
 		versionPath := path.Join(p.Name, v)
