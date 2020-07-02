@@ -1,7 +1,9 @@
 package sentry
 
 import (
+	"fmt"
 	"os"
+	"runtime/debug"
 	"time"
 
 	"github.com/cdnjs/tools/util"
@@ -24,7 +26,7 @@ func PanicHandler() {
 	err := recover()
 
 	if err != nil {
-		NotifyError(err)
+		NotifyError(fmt.Errorf("panic: %s\n%s", err, debug.Stack()))
 		panic(err)
 	}
 }
