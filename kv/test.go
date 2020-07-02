@@ -2,19 +2,18 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
-	"path/filepath"
-	"runtime"
 	"strings"
 
 	//cloudflare "github.com/cdnjs/tools/cloudflare-go/cloudflare"
 	cloudflare "github.com/tc80/cloudflare-go"
 
-	"github.com/cdnjs/tools/packages"
 	"github.com/cdnjs/tools/util"
 )
 
@@ -78,14 +77,44 @@ func worker(basePath string, paths <-chan string, kvPairs chan<- *cloudflare.Wor
 }
 
 func main() {
-	r, err := api.WriteWorkersKV(
-		context.Background(),
-		namespaceID,
-		"test-key",
-		[]byte("hello world"),
-	)
+	// r, err := api.WriteWorkersKV(
+	// 	context.Background(),
+	// 	namespaceID,
+	// 	"test-key",
+	// 	[]byte("hello world"),
+	// )
+
+	payload := make([]byte, 300)
+	_, err := rand.Read(payload)
 	util.Check(err)
+
+	kvs := []*cloudflare.WorkersKVPair{
+		&cloudflare.WorkersKVPair{
+			Key:    "test2",
+			Value:  base64.StdEncoding.EncodeToString([]byte("hello world")),
+			Base64: true,
+			Metadata: struct {
+				Prefix []string `json:"prefix"`
+				SRI    string   `json:"sri,omitempty"` // only calculate for files
+			}{
+				Prefix: []string{
+					"longpckname",
+				},
+				SRI: "something",
+			},
+		},
+	}
+	r, err := api.WriteWorkersKVBulk(context.Background(), namespaceID, kvs)
 	fmt.Println(r)
+	util.Check(err)
+
+	//bytes, err := api.ReadWorkersKV(context.Background(), namespaceID, "test2")
+	re, err := api.ListWorkersKVs(context.Background(), namespaceID)
+
+	fmt.Printf("%v\n", re)
+
+	util.Check(err)
+	//fmt.Println(r)
 	// api.WriteWorkersKVBulk()
 	// cloudflare.WorkersKVBulkWriteRequest{}
 	//api.ListWorkersKVs()
@@ -111,46 +140,46 @@ func main() {
 
 	os.Exit(1)
 
-	basePath := util.GetCDNJSPackages()
-	files, err := filepath.Glob(path.Join(basePath, "*", "package.json"))
-	util.Check(err)
+	// basePath := util.GetCDNJSPackages()
+	// files, err := filepath.Glob(path.Join(basePath, "*", "package.json"))
+	// util.Check(err)
 
-	// for i, f := range files {
-	// 	fmt.Printf("%d - %s\n", i, f)
+	// // for i, f := range files {
+	// // 	fmt.Printf("%d - %s\n", i, f)
+	// // }
+	// paths := make(chan string)
+	// kvPairs := make(chan *cloudflare.WorkersKVPair)
+
+	// for i := 0; i < runtime.NumCPU(); i++ {
+	// 	go worker(basePath, paths, kvPairs)
 	// }
-	paths := make(chan string)
-	kvPairs := make(chan *cloudflare.WorkersKVPair)
 
-	for i := 0; i < runtime.NumCPU(); i++ {
-		go worker(basePath, paths, kvPairs)
-	}
+	// p, err := packages.ReadPackageJSON(context.Background(), files[4])
+	// util.Check(err)
 
-	p, err := packages.ReadPackageJSON(context.Background(), files[4])
-	util.Check(err)
+	// var kvs []*cloudflare.WorkersKVPair
 
-	var kvs []*cloudflare.WorkersKVPair
+	// // make api call to get kv entry for this particular package
 
-	// make api call to get kv entry for this particular package
-
-	for _, v := range p.Versions() {
-		versionPath := path.Join(p.Name, v)
-		strs, err := util.ListFilesInVersion(context.Background(), path.Join(p.Path(), v))
-		util.Check(err)
-		for _, s := range strs {
-			paths <- path.Join(versionPath, s)
-		}
-		for i := 0; i < len(strs); i++ {
-			// <-kvPairs
-			k := <-kvPairs
-			fmt.Println("received! ", k.Key, len(k.Value))
-			kvs = append(kvs, k)
-		}
-		// break
-	}
-	fmt.Println("waiting ...")
-	resp, err := api.WriteWorkersKVBulk(context.Background(), namespaceID, kvs)
-	util.Check(err)
-	fmt.Println(resp)
+	// for _, v := range p.Versions() {
+	// 	versionPath := path.Join(p.Name, v)
+	// 	strs, err := util.ListFilesInVersion(context.Background(), path.Join(p.Path(), v))
+	// 	util.Check(err)
+	// 	for _, s := range strs {
+	// 		paths <- path.Join(versionPath, s)
+	// 	}
+	// 	for i := 0; i < len(strs); i++ {
+	// 		// <-kvPairs
+	// 		k := <-kvPairs
+	// 		fmt.Println("received! ", k.Key, len(k.Value))
+	// 		kvs = append(kvs, k)
+	// 	}
+	// 	// break
+	// }
+	// fmt.Println("waiting ...")
+	// resp, err := api.WriteWorkersKVBulk(context.Background(), namespaceID, kvs)
+	// util.Check(err)
+	// fmt.Println(resp)
 
 	os.Exit(1)
 
