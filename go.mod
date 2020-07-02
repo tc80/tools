@@ -8,7 +8,6 @@ require (
 	cloud.google.com/go/storage v1.5.0
 	github.com/algolia/algoliasearch-client-go/v3 v3.4.0
 	github.com/blang/semver v3.5.1+incompatible
-	github.com/cloudflare/cloudflare-go v0.12.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dlclark/regexp2 v1.2.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect

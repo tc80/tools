@@ -11,9 +11,11 @@ import (
 	"runtime"
 	"strings"
 
+	//cloudflare "github.com/cdnjs/tools/cloudflare-go/cloudflare"
+	cloudflare "github.com/tc80/cloudflare-go"
+
 	"github.com/cdnjs/tools/packages"
 	"github.com/cdnjs/tools/util"
-	cloudflare "github.com/cloudflare/cloudflare-go"
 )
 
 const (
@@ -76,6 +78,14 @@ func worker(basePath string, paths <-chan string, kvPairs chan<- *cloudflare.Wor
 }
 
 func main() {
+	r, err := api.WriteWorkersKV(
+		context.Background(),
+		namespaceID,
+		"test-key",
+		[]byte("hello world"),
+	)
+	util.Check(err)
+	fmt.Println(r)
 	// api.WriteWorkersKVBulk()
 	// cloudflare.WorkersKVBulkWriteRequest{}
 	//api.ListWorkersKVs()
@@ -98,6 +108,7 @@ func main() {
 	// 	fmt.Println(resp)
 	// }
 	// deleteTestEntries("3D")
+
 	os.Exit(1)
 
 	basePath := util.GetCDNJSPackages()
