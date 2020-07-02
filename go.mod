@@ -8,6 +8,7 @@ require (
 	cloud.google.com/go/storage v1.5.0
 	github.com/algolia/algoliasearch-client-go/v3 v3.4.0
 	github.com/blang/semver v3.5.1+incompatible
+	github.com/cloudflare/cloudflare-go v0.12.1-0.20200702124351-f76f4c83971a
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dlclark/regexp2 v1.2.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
@@ -19,9 +20,8 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/stretchr/testify v1.6.1
-	golang.org/x/crypto v0.0.0-20200214034016-1d94cc7ab1c6 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/net v0.0.0-20200602114024-627f9648deb9
+	golang.org/x/net v0.0.0-20200625001655-4c5254603344
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/tools v0.0.0-20200626171337-aa94e735be7f // indirect
 	google.golang.org/api v0.17.0
