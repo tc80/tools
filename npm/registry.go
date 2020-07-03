@@ -3,13 +3,11 @@ package npm
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/cdnjs/tools/sentry"
 	"github.com/cdnjs/tools/util"
 )
 
@@ -89,6 +87,10 @@ func GetVersions(name string) ([]Version, string) {
 	body, err := ioutil.ReadAll(resp.Body)
 	util.Check(err)
 
+	if len(body) == 21 {
+		return []Version{}, "not in npm"
+	}
+
 	var r Registry
 	util.Check(json.Unmarshal(body, &r))
 
@@ -111,7 +113,8 @@ func GetVersions(name string) ([]Version, string) {
 					continue
 				}
 			}
-			panic(fmt.Sprintf("no time stamp for npm version %s", k))
+			return []Version{}, "time_failure"
+			//panic(fmt.Sprintf("no time stamp for npm version %s (%s)", k, name))
 		}
 	}
 
@@ -121,9 +124,10 @@ func GetVersions(name string) ([]Version, string) {
 		// Quick fix: log in sentry when npm registry does not have latest
 		// such as in the case of https://registry.npmjs.org/angularjs-ie8-build.
 
-		sentry.NotifyError(fmt.Errorf("no latest tag for npm package %s", name))
-		return []Version{}, ""
+		//sentry.NotifyError(fmt.Errorf("no latest tag for npm package %s", name))
+		// return []Version{}, ""
 		//panic(fmt.Sprintf("no latest tag for npm package %s", name))
+		return []Version{}, "failure"
 	}
 
 	return versions, latest
