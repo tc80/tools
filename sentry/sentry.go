@@ -13,7 +13,8 @@ import (
 func Init() {
 	if sentryDsn, ok := os.LookupEnv("SENTRY_DSN"); ok {
 		util.Check(sentry.Init(sentry.ClientOptions{
-			Dsn: sentryDsn,
+			Dsn:              sentryDsn,
+			AttachStacktrace: true,
 		}))
 	}
 }
