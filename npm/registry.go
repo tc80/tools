@@ -121,14 +121,46 @@ func GetVersions(name string) ([]Version, string) {
 	// get latest version according to npm
 	latest, ok := r.DistTags["latest"]
 	if !ok {
+		latest, ok = r.getUnpublishedLatest()
+		if !ok {
+			latest, ok = r.DistTags["[latest]"]
+			if !ok {
+				return []Version{}, "failure"
+			}
+		}
 		// Quick fix: log in sentry when npm registry does not have latest
 		// such as in the case of https://registry.npmjs.org/angularjs-ie8-build.
 
-		//sentry.NotifyError(fmt.Errorf("no latest tag for npm package %s", name))
+		// sentry.NotifyError(fmt.Errorf("no latest tag for npm package %s", name))
 		// return []Version{}, ""
 		//panic(fmt.Sprintf("no latest tag for npm package %s", name))
-		return []Version{}, "failure"
 	}
 
 	return versions, latest
+
+}
+
+func (r *Registry) getUnpublishedLatest() (string, bool) {
+	u, ok := r.TimeStamps["unpublished"]
+	if !ok {
+		return "", false
+	}
+	unpubMap, ok := u.(map[string]interface{})
+	if !ok {
+		return "", false
+	}
+	tags, ok := unpubMap["tags"]
+	if !ok {
+		return "", false
+	}
+	tagsMap, ok := tags.(map[string]interface{})
+	if !ok {
+		return "", false
+	}
+	latest, ok := tagsMap["latest"]
+	if !ok {
+		return "", false
+	}
+	latestStr, ok := latest.(string)
+	return latestStr, ok
 }
