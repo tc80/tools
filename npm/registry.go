@@ -9,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/cdnjs/tools/sentry"
 	"github.com/cdnjs/tools/util"
 )
 
@@ -18,6 +17,7 @@ type Registry struct {
 	Versions   map[string]interface{} `json:"versions"`  // Versions contains metadata about each npm version.
 	TimeStamps map[string]interface{} `json:"time"`      // TimeStamps contains times for each versions as well as the created/modified time.
 	DistTags   map[string]string      `json:"dist-tags"` // DistTags map dist tags to string versions
+	LegacyTags map[string]string      `json:"tags"`      // LegacyTags are a legacy form of 'dist-tags'
 }
 
 // Version represents a version of an npm package.
@@ -118,11 +118,18 @@ func GetVersions(name string) ([]Version, string) {
 	// get latest version according to npm
 	latest, ok := r.DistTags["latest"]
 	if !ok {
+		latest, ok = r.LegacyTags["latest"]
+		if !ok {
+			latest, ok = r.DistTags["[latest]"]
+			if !ok {
+
+			}
+		}
 		// Quick fix: log in sentry when npm registry does not have latest
 		// such as in the case of https://registry.npmjs.org/angularjs-ie8-build.
 
-		sentry.NotifyError(fmt.Errorf("no latest tag for npm package %s", name))
-		return []Version{}, ""
+		// sentry.NotifyError(fmt.Errorf("no latest tag for npm package %s", name))
+		// return []Version{}, ""
 		//panic(fmt.Sprintf("no latest tag for npm package %s", name))
 	}
 
