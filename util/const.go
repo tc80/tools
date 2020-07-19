@@ -1,5 +1,7 @@
 package util
 
+import "syscall"
+
 const (
 	// ImportAllMaxVersions is the maximum number of versions we will import.
 	// When no versions exist in cdnjs and we are trying to import all of them,
@@ -24,4 +26,8 @@ const (
 	// enough leeway for any metadata stored with each key (up to 1024 bytes),
 	// long keys, and verbose JSON syntax.
 	MaxBulkWritePayload int64 = 1e8
+
+	// ShutdownSignal is sent to notify that the program needs to start
+	// gracefully shutting down.
+	ShutdownSignal = syscall.SIGUSR1
 )

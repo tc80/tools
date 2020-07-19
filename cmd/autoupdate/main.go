@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/signal"
 	"path"
-	"syscall"
 	"time"
 
 	"github.com/blang/semver"
@@ -86,7 +85,7 @@ func main() {
 
 	// create channel to handle signals
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGTERM)
+	signal.Notify(c, util.ShutdownSignal)
 
 	for _, f := range getPackages(defaultCtx) {
 		// create context with file path prefix, standard debug logger
