@@ -18,6 +18,7 @@ import (
 
 const (
 	jsFilesPkg          = "jsPkg"
+	invalidExtsPkg      = "invalidExtsPkg"
 	oversizedFilesPkg   = "oversizePkg"
 	unpublishedFieldPkg = "unpublishedPkg"
 	sortByTimeStampPkg  = "sortByTimePkg"
@@ -92,6 +93,20 @@ func fakeNpmHandlerShowFiles(w http.ResponseWriter, r *http.Request) {
 				"0.0.2": {
 					"dist": {
 						"tarball": "http://registry.npmjs.org/`+jsFilesPkg+`.tgz"
+					}
+				}
+			},
+			"time": { "0.0.2": "2012-06-19T04:01:32.220Z" },
+			"dist-tags": {
+				"latest": "0.0.2"
+			}
+		}`)
+	case "/" + invalidExtsPkg:
+		fmt.Fprint(w, `{
+			"versions": {
+				"0.0.2": {
+					"dist": {
+						"tarball": "http://registry.npmjs.org/`+invalidExtsPkg+`.tgz"
 					}
 				}
 			},
@@ -184,6 +199,18 @@ func fakeNpmHandlerShowFiles(w http.ResponseWriter, r *http.Request) {
 			"a.js": "a",
 			"b.js": "b",
 		})
+	case "/" + invalidExtsPkg + ".tgz":
+		servePackage(w, r, map[string]string{
+			"a.js":   "a",
+			"b.html": "b",
+			"c.css":  "c",
+			"d.png":  "d",
+			"e.zip":  "e",
+			"f.ts":   "f",
+			"g.exe":  "g",
+			"h.aac":  "h",
+			"i.mov":  "i",
+		})
 	case "/" + oversizedFilesPkg + ".tgz":
 		servePackage(w, r, map[string]string{
 			"a.js": strings.Repeat("a", int(util.MaxFileSize)+100),
@@ -249,6 +276,45 @@ most recent version: 0.0.2
 ` + "```" + `
 a.js
 b.js
+` + "```" + `
+
+0 last version(s):
+`,
+		},
+
+		{
+			name: "warn for invalid file extensions",
+			input: `{
+				"name": "foo",
+				"repository": {
+					"type": "git"
+				},
+				"autoupdate": {
+					"source": "npm",
+					"target": "` + invalidExtsPkg + `",
+					"fileMap": [
+						{ "basePath":"", "files":["*.js"] }
+					]
+				}
+			}`,
+			expected: `
+
+most recent version: 0.0.2
+
+` + "```" + `
+a.js
+b.html
+` + ciWarn(file, "file extension `.html` not supported, will ignore") + `
+c.css
+d.png
+e.zip
+` + ciWarn(file, "file extension `.zip` not supported, will ignore") + `
+f.ts
+g.exe
+` + ciWarn(file, "file extension `.exe` not supported, will ignore") + `
+h.aac
+i.mov
+` + ciWarn(file, "file extension `.mov` not supported, will ignore") + `
 ` + "```" + `
 
 0 last version(s):

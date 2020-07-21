@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -189,7 +190,13 @@ func printMostRecentVersion(ctx context.Context, p *packages.Package, dir string
 
 	fmt.Printf("\n```\n")
 	for _, file := range filesToCopy {
-		fmt.Printf("%s\n", file.To)
+		name := file.To
+		fmt.Printf("%s\n", name)
+
+		ext := path.Ext(name)
+		if _, ok := util.AcceptedExtensions[ext]; !ok {
+			warn(ctx, fmt.Sprintf("file extension `%s` not supported, will ignore", ext))
+		}
 	}
 	fmt.Printf("```\n")
 }
