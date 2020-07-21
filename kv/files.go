@@ -13,21 +13,6 @@ import (
 	"github.com/cdnjs/tools/util"
 )
 
-var (
-	// these file extensions are ignored and will not
-	// be compressed or uploaded to KV
-	ignored = map[string]bool{
-		".br": true,
-		".gz": true,
-	}
-	// // these file extensions will be uploaded to KV
-	// // but not compessed
-	// doNotCompress = map[string]bool{
-	// 	".woff":  true,
-	// 	".woff2": true,
-	// }
-)
-
 // Gets the requests to update a number of files in KV.
 // In order to do this, it will create a brotli and gzip version for each uncompressed file
 // that is not banned (ex. `.woff2`, `.br`, `.gz`).
@@ -37,10 +22,12 @@ func getFileWriteRequests(ctx context.Context, pkg, version, fullPathToVersion s
 
 	for _, fromVersionPath := range fromVersionPaths {
 		ext := path.Ext(fromVersionPath)
-		if _, ok := ignored[ext]; ok {
+		compressible, ok := util.AcceptedExtensions[ext]
+		if !ok {
 			util.Debugf(ctx, "file ignored from kv write: %s\n", fromVersionPath)
 			continue // ignore completely
 		}
+
 		fullPath := path.Join(fullPathToVersion, fromVersionPath)
 		baseFileKey := path.Join(baseVersionPath, fromVersionPath)
 
@@ -68,9 +55,11 @@ func getFileWriteRequests(ctx context.Context, pkg, version, fullPathToVersion s
 		}
 
 		// TODO: Stop pushing uncompressed when Worker is fixed.
-		//if _, ok := doNotCompress[ext]; ok {
-		// will insert to KV without compressing further
-		//	util.Debugf(ctx, "file will not be compressed in kv write: %s\n", fromVersionPath)
+		//
+		_ = compressible
+		// if !compressible {
+		// 	// will insert to KV without compressing further
+		// 	util.Debugf(ctx, "file will not be compressed in kv write: %s\n", fromVersionPath)
 		kvs = append(kvs, &writeRequest{
 			key:   baseFileKey,
 			value: bytes,

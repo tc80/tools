@@ -29,3 +29,36 @@ const (
 	// particular KV entry.
 	MaxMetadataSize int64 = 1024
 )
+
+var (
+	// AcceptedExtensions maps all accepted extensions to a boolean determining
+	// if the extension should be compressed when inserted into KV.
+	AcceptedExtensions = map[string]bool{
+		".js":    true,
+		".css":   true,
+		".png":   true,
+		".gif":   true,
+		".jpg":   true,
+		".jpeg":  true,
+		".swf":   true,
+		".svg":   true,
+		".ttf":   true,
+		".eot":   true,
+		".woff":  false,
+		".woff2": false,
+		".otf":   true,
+		".map":   true,
+		".cur":   true,
+		".mp3":   true,
+		".ogg":   true,
+		".aac":   true,
+		".scss":  true,
+		".webp":  true,
+		".json":  true,
+		".wasm":  true,
+		".ts":    true,
+		".hpb":   true,
+		".lang":  true,
+		".mjs":   true,
+	}
+)
