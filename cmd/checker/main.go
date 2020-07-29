@@ -164,7 +164,7 @@ func parseHumanPackage(ctx context.Context, pckgPath string, noPathValidation bo
 		// check package path matches regex
 		matches := pckgPathRegex.FindStringSubmatch(pckgPath)
 		if matches == nil {
-			err(ctx, fmt.Sprintf("package path `%s` does not match %s", pckgPath, pckgPathRegex.String()))
+			panic(fmt.Sprintf("package path `%s` does not match %s", pckgPath, pckgPathRegex.String()))
 			return nil
 		}
 
@@ -173,7 +173,7 @@ func parseHumanPackage(ctx context.Context, pckgPath string, noPathValidation bo
 		actualDir, pckgName := matches[1], matches[2]
 		expectedDir := strings.ToLower(string(pckgName[0]))
 		if actualDir != expectedDir {
-			err(ctx, fmt.Sprintf("package `%s` must go into `%s` dir, not `%s` dir", pckgName, expectedDir, actualDir))
+			panic(fmt.Sprintf("package `%s` must go into `%s` dir, not `%s` dir", pckgName, expectedDir, actualDir))
 			return nil
 		}
 	}
@@ -298,6 +298,8 @@ func lintPackage(pckgPath string, noPathValidation bool) {
 	if pckg == nil {
 		return
 	}
+
+	return
 
 	switch *pckg.Autoupdate.Source {
 	case "npm":
