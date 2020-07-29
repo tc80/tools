@@ -177,6 +177,7 @@ func parseHumanPackage(ctx context.Context, pckgPath string, noPathValidation bo
 			return nil
 		}
 	}
+	return nil
 
 	// parse package JSON
 	pckg, readerr := packages.ReadHumanJSONFile(ctx, pckgPath)
